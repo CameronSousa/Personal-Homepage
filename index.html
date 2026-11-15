@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home</title>
+<style>
+  /* ===== THEME: edit these colors/fonts to taste ===== */
+  :root {
+    --bg: #0a0e18; --glass: rgba(24, 32, 51, .55); --border: rgba(143, 176, 255, .18);
+    --text: #e8ecf4; --muted: #8d9ab8; --accent: #8fb0ff; --good: #6ee7b7;
+    --font: "Avenir Next", ui-rounded, system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace; --radius: 16px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#eef1f8; --glass:rgba(255,255,255,.65); --border:rgba(47,85,212,.18);
+            --text:#151a28; --muted:#5a6684; --accent:#2f55d4; --good:#0f9d6b; }
+  }
+  /* ====================================================== */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; justify-content: center; padding: 24px 20px 48px; }
+  #bg { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
+  main { position: relative; z-index: 1; width: 100%; max-width: 920px; }
+  .glass { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  button { background: var(--accent); color: var(--bg); border: 0; border-radius: 10px; font: inherit; font-weight: 600; padding: 9px 16px; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); font-weight: 500; }
+  button.ghost.on, button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  input[type=text], input[type=number], select { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px; font: inherit; padding: 8px 10px; min-width: 0; }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+
+  .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .hero { text-align: center; margin-top: 4vh; }
+  .date { color: var(--muted); font-size: 1.05rem; margin: 0 0 10px; }
+  .clock { font-family: var(--mono); font-size: clamp(3.2rem, 11vw, 6.5rem); font-weight: 200; letter-spacing: -.05em; margin: 0; line-height: 1; text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .greeting { color: var(--text); font-size: 1.5rem; font-weight: 500; margin: 12px 0 32px; }
+  #search { display: flex; align-items: center; gap: 10px; max-width: 640px; margin: 0 auto; padding: 6px 6px 6px 18px; transition: border-color .15s, box-shadow .15s; }
+  #search { position: relative; z-index: 50; }
+  #search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 40px color-mix(in srgb, var(--accent) 20%, transparent); }
+  #q { flex: 1; border: 0; outline: 0; font-size: 1.1rem; padding: 12px 0; }
+  #search select { color: var(--muted); font-size: .85rem; }
+  .hint { color: var(--muted); font-size: .8rem; text-align: center; margin: 10px 0 0; }
+  .hint code { font-family: var(--mono); color: var(--text); }
+
+  .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 28px 0 32px; }
+  .links a { color: var(--text); text-decoration: none; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--glass); font-size: .95rem; }
+  .links a:hover { border-color: var(--accent); color: var(--accent); }
+  .links .rm { margin-left: 8px; color: #f87171; cursor: pointer; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { padding: 20px; position: relative; }
+  .card h2 { margin: 0 0 14px; font-size: .95rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 10px var(--good); }
+  .dot.off { background: #f87171; box-shadow: 0 0 10px #f87171; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; font-family: var(--mono); font-size: .82rem; }
+  dt { color: var(--muted); } dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+  .temp { font-size: 3rem; font-weight: 300; line-height: 1; }
+  .sub { color: var(--muted); margin: 6px 0 14px; }
+  .meter { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 14px; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  textarea { width: 100%; height: 150px; resize: vertical; background: transparent; color: var(--text); border: 0; outline: 0; font-family: var(--mono); font-size: .85rem; line-height: 1.6; }
+  .todo-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; cursor: pointer; }
+  .todo-row.done span { text-decoration: line-through; color: var(--muted); }
+  .todo-row .rm { margin-left: auto; color: var(--muted); }
+  .todo-add { margin-top: 10px; width: 100%; }
+  .tmr { font-family: var(--mono); font-size: 2.6rem; font-weight: 300; margin-bottom: 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* drag and drop + link editing */
+  body.editing .links a { cursor: grab; }
+  .links .ed { margin-left: 8px; color: var(--accent); cursor: pointer; }
+  .links a.dragging, .card.dragging { opacity: .4; }
+  .links a.drop-before { box-shadow: -4px 0 0 var(--accent); }
+  .links a.drop-after { box-shadow: 4px 0 0 var(--accent); }
+  .card.drop-l { box-shadow: -6px 0 0 var(--accent); }
+  .card.drop-r { box-shadow: 6px 0 0 var(--accent); }
+  .card.drop-t { box-shadow: 0 -6px 0 var(--accent); }
+  .card.drop-b { box-shadow: 0 6px 0 var(--accent); }
+  .grip { cursor: grab; user-select: none; border: 1px solid var(--border); border-radius: 10px; padding: 3px 9px; font-size: .8rem; line-height: 1.5; color: var(--muted); }
+  .grip:hover { border-color: var(--accent); color: var(--accent); }
+  .grip:active { cursor: grabbing; }
+
+  /* search engine dropdown */
+  .dd { position: relative; }
+  .dd-btn { display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-weight: 500; font-size: .88rem; padding: 9px 10px 9px 14px; white-space: nowrap; transition: border-color .15s, color .15s, background .15s; }
+  .dd-btn:hover, .dd-btn[aria-expanded=true] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .dd-btn svg { width: 12px; height: 12px; flex: none; transition: transform .18s; }
+  .dd-btn[aria-expanded=true] svg { transform: rotate(180deg); }
+  .dd-menu { position: absolute; right: 0; top: calc(100% + 10px); z-index: 30; min-width: 210px; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none;
+    background: color-mix(in srgb, var(--bg) 90%, var(--accent) 6%); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.4);
+    visibility: hidden; opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right; transition: opacity .13s, transform .13s, visibility .13s; }
+  .dd.open .dd-menu { visibility: visible; opacity: 1; transform: none; }
+  .dd-menu li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 12px; border-radius: 9px; cursor: pointer; font-size: .92rem; }
+  .dd-menu li.active { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .dd-menu li[aria-selected=true] { color: var(--accent); font-weight: 600; }
+  .dd-menu li svg { width: 14px; height: 14px; flex: none; opacity: 0; }
+  .dd-menu li[aria-selected=true] svg { opacity: 1; }
+  .dd-menu .sep { height: 1px; margin: 5px 6px; background: var(--border); padding: 0; cursor: default; }
+
+  /* weather location */
+  .card h2 .wx-loc { margin-left: auto; padding: 2px 9px; font-size: .75rem; }
+  button.ghost.wxopt { display: block; width: 100%; text-align: left; margin-top: 6px; }
+  .wxopt small { display: block; color: var(--muted); font-weight: 400; }
+
+  /* edit mode */
+  .only-edit { display: none !important; }
+  body.editing .only-edit { display: flex !important; }
+  body.editing .card { outline: 1px dashed var(--accent); outline-offset: 3px; }
+  .ctl { position: absolute; top: 10px; right: 10px; gap: 4px; }
+  .ctl button { padding: 3px 8px; font-size: .8rem; }
+  .panel { padding: 16px 18px; margin: 20px 0 0; flex-direction: column; gap: 12px; }
+  body.editing .card h2 { padding-right: 170px; }
+  .ctext { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; font-size: .92rem; }
+  .ctext a, .clinks a { color: var(--accent); }
+  .clinks { display: flex; flex-direction: column; gap: 8px; }
+  .clinks a { text-decoration: none; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); }
+  .clinks a:hover { border-color: var(--accent); color: var(--accent); }
+  .cimg { width: 100%; border-radius: 10px; display: block; }
+  dialog { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: min(440px, 92vw); }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  dialog h3 { margin: 0 0 14px; }
+  .fld { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; color: var(--muted); font-size: .85rem; }
+  .fld input[type=text], .fld input[type=datetime-local], .fld select, .fld textarea { width: 100%; }
+  .fld textarea { height: 110px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; background: transparent; color: var(--text); }
+  .fld.chk { flex-direction: row; align-items: center; gap: 8px; }
+  .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .chip { border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: .85rem; }
+  .panel label { color: var(--muted); font-size: .85rem; display: flex; align-items: center; gap: 8px; }
+  input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--border); background: none; border-radius: 8px; }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<main>
+  <div class="bar-top">
+    <div class="tabs" id="tabs"></div>
+    <button class="ghost" id="editBtn">Edit</button>
+  </div>
+
+  <section class="panel glass only-edit" id="panel"></section>
+
+  <section class="hero">
+    <p class="date" id="date"></p>
+    <h1 class="clock" id="clock">--:--</h1>
+    <p class="greeting" id="greeting">Hello</p>
+    <form id="search" class="glass" autocomplete="off">
+      <input type="text" id="q" placeholder="Search or type a URL" autofocus aria-label="Search">
+      <select id="engine" aria-label="Search engine" hidden>
+        <option value="google">Google</option><option value="ddg">DuckDuckGo</option>
+        <option value="bing">Bing</option><option value="brave">Brave</option>
+      </select>
+      <div class="dd" id="engDD">
+        <button type="button" class="dd-btn" id="engBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="engMenu" aria-label="Search engine">
+          <span id="engLabel">Google</span>
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </button>
+        <ul class="dd-menu" id="engMenu" role="listbox" tabindex="-1" aria-label="Search engine"></ul>
+      </div>
+      <button type="submit">Search</button>
+    </form>
+    <p class="hint">Start with a shortcut to search a specific site: <code>yt</code> YouTube · <code>gh</code> GitHub · <code>w</code> Wikipedia · <code>g</code> Google · <code>d</code> DuckDuckGo<br>For example, <code>yt lofi beats</code>. Press <code>/</code> to jump to the search bar.</p>
+  </section>
+
+  <nav class="links" id="links"></nav>
+  <section class="grid" id="grid"></section>
+</main>
+
+<dialog id="dlg">
+  <form id="dlgForm">
+    <h3 id="dTitleHead">New custom box</h3>
+    <label class="fld">Title <input type="text" id="dTitle" placeholder="e.g. Reading list" required></label>
+    <label class="fld">Type
+      <select id="dKind">
+        <option value="text">Text note</option>
+        <option value="links">Link list</option>
+        <option value="list">Checklist</option>
+        <option value="image">Image / GIF</option>
+        <option value="countdown">Countdown</option>
+      </select></label>
+    <label class="fld" data-for="text links"><span id="dBodyLbl">Text</span><textarea id="dBody"></textarea></label>
+    <label class="fld" data-for="image">Image URL <input type="text" id="dUrl" placeholder="https://…"></label>
+    <label class="fld" data-for="countdown">Date and time <input type="datetime-local" id="dDate"></label>
+    <label class="fld chk"><input type="checkbox" id="dWide"> Make this box full width</label>
+    <div class="dlg-actions"><button type="button" class="ghost" id="dCancel">Cancel</button><button type="submit">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="linkDlg">
+  <form id="linkForm">
+    <h3 id="lHead">Add a link</h3>
+    <label class="fld">URL <input type="text" id="lUrl" placeholder="example.com or https://…" required autocomplete="off"></label>
+    <label class="fld">Name <input type="text" id="lName" placeholder="Leave blank to use the site name" autocomplete="off"></label>
+    <div class="lprev sub" id="lPrev" style="margin:0 0 14px"></div>
+    <div class="dlg-actions"><button type="button" class="ghost" id="lCancel">Cancel</button><button type="submit" id="lSave">Add link</button></div>
+  </form>
+</dialog>
+
+<dialog id="delDlg">
+  <form method="dialog" id="delForm">
+    <h3>Delete this profile?</h3>
+    <p class="sub" id="delMsg" style="margin:0 0 16px;line-height:1.5"></p>
+    <div class="dlg-actions"><button type="button" class="ghost" id="delCancel">Keep it</button><button type="submit" id="delOk" style="background:#ef4444;border-color:#ef4444;color:#fff">Delete profile</button></div>
+  </form>
+</dialog>
+
+<dialog id="wxDlg">
+  <form id="wxForm">
+    <h3>Weather location</h3>
+    <label class="fld chk"><input type="radio" name="wxMode" value="auto"> Use my current location</label>
+    <div class="row" id="wxGpsRow" style="margin:-4px 0 12px 26px"><button type="button" class="ghost" id="wxGps">Use precise GPS</button><span class="sub" style="margin:0;font-size:.8rem">Asks your browser once. Otherwise your approximate location is used.</span></div>
+    <label class="fld chk"><input type="radio" name="wxMode" value="custom"> A specific place</label>
+    <div id="wxCustom">
+      <div class="row"><input type="text" id="wxQ" placeholder="City or ZIP, e.g. Secaucus, NJ" style="flex:1" autocomplete="off" aria-label="Place to search for"><button type="button" class="ghost" id="wxFind">Search</button></div>
+      <div id="wxRes" role="listbox" aria-label="Matching places"></div>
+    </div>
+    <p class="sub" id="wxMsg" style="margin:12px 0"></p>
+    <div class="dlg-actions"><button type="button" class="ghost" id="wxCancel">Cancel</button><button type="submit">Save</button></div>
+  </form>
+</dialog>
+
+<script src="config.js" onerror="void 0"></script>
+<script src="config.example.js" onerror="void 0"></script>
+<script>
+  // Fallback weather location if lookups fail. Everything else is edited on the page with the Edit button.
+  const CFG = window.HOMEPAGE_CONFIG || {}; // loaded from config.js (private) or config.example.js (public defaults)
+  const WEATHER = Object.assign({ label: "New York, NY", lat: 40.71, lon: -74.01, unit: "fahrenheit" }, CFG.weather); // unit: "fahrenheit" or "celsius"
+
+  const $ = id => document.getElementById(id), qsa = s => [...document.querySelectorAll(s)];
+  const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const uid = () => Math.random().toString(36).slice(2, 8);
+
+  /* ---------- State: profiles, each with its own greeting name, accent, links and blocks ---------- */
+  const DEFAULT = () => ({ active: "main", profiles: [{
+    id: "main", name: CFG.profileName || "Home", greet: CFG.greet || "friend", accent: CFG.accent || "",
+    links: (CFG.links || [{ name: "GitHub", url: "https://github.com" }, { name: "YouTube", url: "https://youtube.com" }]).map(l => ({ ...l })),
+    blocks: [{ id: uid(), type: "system" }, { id: uid(), type: "weather" }, { id: uid(), type: "notes", text: store.get("notes") || "" }]
+  }] });
+  let S; try { S = JSON.parse(store.get("hp2")); } catch (e) {}
+  if (!S || !S.profiles || !S.profiles.length) S = DEFAULT();
+  const save = () => store.set("hp2", JSON.stringify(S));
+  const P = () => S.profiles.find(p => p.id === S.active) || S.profiles[0];
+
+  /* ---------- Shared live data ---------- */
+  const ua = navigator.userAgent;
+  const sysRows = {
+    OS: /Mac OS X/.test(ua) ? "macOS" : /iPhone|iPad/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Unknown",
+    Browser: (() => { const m = ua.match(/(Edg|Chrome|Firefox)\/(\d+)/); if (m) return (m[1] === "Edg" ? "Edge" : m[1]) + " " + m[2];
+                      const s = ua.match(/Version\/([\d.]+).*Safari/); return s ? "Safari " + s[1] : "Browser"; })(),
+    "CPU cores": navigator.hardwareConcurrency || "n/a",
+    GPU: (() => { try { const gl = document.createElement("canvas").getContext("webgl"), x = gl.getExtension("WEBGL_debug_renderer_info");
+                  return (gl.getParameter(x ? x.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || "").replace(/ANGLE \(|\)/g, "").slice(0, 28) || "n/a"; } catch (e) { return "n/a"; } })(),
+    Screen: `${screen.width}×${screen.height} @${window.devicePixelRatio}x`,
+    Theme: matchMedia("(prefers-color-scheme: dark)").matches ? "Dark" : "Light",
+    Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, Language: navigator.language,
+    Battery: null, Session: "0m", FPS: "…"
+  };
+  let fps = 0, wxHTML = "";
+  function paintSys() {
+    qsa(".sys").forEach(dl => dl.innerHTML = Object.entries(sysRows).filter(([, v]) => v !== null).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join(""));
+    qsa(".fpsbar").forEach(b => b.style.width = Math.min(100, fps / .6) + "%");
+    qsa(".netdot").forEach(d => d.className = "dot netdot" + (navigator.onLine ? "" : " off"));
+  }
+  const paintWx = () => qsa(".wx").forEach(e => e.innerHTML = wxHTML || `<div class="sub">Loading…</div>`);
+  addEventListener("online", paintSys); addEventListener("offline", paintSys);
+  const t0 = Date.now();
+  setInterval(() => { const m = Math.floor((Date.now() - t0) / 60000); sysRows.Session = m < 60 ? m + "m" : Math.floor(m / 60) + "h " + (m % 60) + "m"; paintSys(); }, 30000);
+  if (navigator.getBattery) navigator.getBattery().then(b => { const u = () => { sysRows.Battery = Math.round(b.level * 100) + "%" + (b.charging ? " ⚡" : ""); paintSys(); };
+    u(); b.addEventListener("levelchange", u); b.addEventListener("chargingchange", u); });
+
+  /* ---------- Block types ---------- */
+  const TYPES = {
+    system: { label: "System", html: () => `<h2><span class="dot netdot"></span>System</h2><dl class="sys"></dl><div class="meter" title="Frame rate"><i class="fpsbar"></i></div>`, init: paintSys },
+    weather: { label: "Weather", html: () => `<h2>Weather<button type="button" class="ghost wx-loc" title="Change location">Location</button></h2><div class="wx"></div>`,
+      init: el => { paintWx(); el.querySelector(".wx-loc").onclick = openWx; } },
+    notes: { label: "Notes", html: b => `<h2>Scratchpad</h2><textarea placeholder="Jot something down. Saved automatically." aria-label="Notes">${esc(b.text || "")}</textarea>`,
+      init: (el, b) => el.querySelector("textarea").addEventListener("input", e => { b.text = e.target.value; save(); }) },
+    todo: { label: "To-do", html: () => `<h2>To-do</h2><div class="list"></div><input type="text" class="todo-add" placeholder="Add a task and press Enter" aria-label="New task">`,
+      init: (el, b) => {
+        b.items = b.items || [];
+        const list = el.querySelector(".list");
+        const draw = () => { list.innerHTML = b.items.map((t, i) => `<div class="todo-row ${t.done ? "done" : ""}" data-i="${i}"><input type="checkbox" ${t.done ? "checked" : ""} tabindex="-1"><span>${esc(t.t)}</span><b class="rm" data-rm="${i}">×</b></div>`).join("") || `<div class="sub">Nothing yet.</div>`; };
+        list.addEventListener("click", e => { const r = e.target.closest("[data-rm]"), row = e.target.closest(".todo-row");
+          if (r) b.items.splice(+r.dataset.rm, 1); else if (row) b.items[+row.dataset.i].done = !b.items[+row.dataset.i].done; else return; save(); draw(); });
+        el.querySelector(".todo-add").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.value.trim()) { b.items.push({ t: e.target.value.trim(), done: false }); e.target.value = ""; save(); draw(); } });
+        draw(); } },
+    custom: { label: "Custom",
+      html: b => {
+        const t = esc(b.title || "Untitled"), k = b.kind;
+        if (k === "list") return TYPES.todo.html().replace("<h2>To-do</h2>", `<h2>${t}</h2>`);
+        if (k === "links") return `<h2>${t}</h2><div class="clinks">` + (b.text || "").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+          const [n, u] = l.includes("|") ? l.split("|").map(x => x.trim()) : [l, l]; const url = /^https?:\/\//i.test(u) ? u : "https://" + u;
+          return `<a href="${esc(url)}">${esc(n)}</a>`; }).join("") + `</div>`;
+        if (k === "image") return `<h2>${t}</h2>` + (/^https?:\/\//i.test(b.url || "") ? `<img class="cimg" src="${esc(b.url)}" alt="${t}">` : `<div class="sub">Add an image URL with ✎</div>`);
+        if (k === "countdown") return `<h2>${t}</h2><div class="temp cd"></div><div class="sub cdsub"></div>`;
+        return `<h2>${t}</h2><div class="ctext">${esc(b.text || "").replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`)}</div>`;
+      },
+      init: (el, b) => {
+        if (b.kind === "list") TYPES.todo.init(el, b);
+        if (b.kind === "countdown") {
+          const out = el.querySelector(".cd"), sub = el.querySelector(".cdsub"), target = new Date(b.date).getTime();
+          const upd = () => { if (!el.isConnected) return clearInterval(iv);
+            if (isNaN(target)) { out.textContent = "—"; sub.textContent = "Pick a date with ✎"; return; }
+            const ms = target - Date.now(); if (ms <= 0) { out.textContent = "Today!"; sub.textContent = new Date(target).toLocaleString(); return; }
+            const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+            out.textContent = d + (d === 1 ? " day" : " days"); sub.textContent = `${h}h ${m}m · ${new Date(target).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}`; };
+          const iv = setInterval(upd, 30000); upd();
+        }
+      } },
+    timer: { label: "Timer", html: () => `<h2>Timer</h2><div class="tmr">25:00</div><div class="row"><button class="go">Start</button><button class="ghost rs">Reset</button><input type="number" class="mins" value="25" min="1" max="999" style="width:70px" aria-label="Minutes"><span class="sub" style="margin:0">min</span></div>`,
+      init: el => {
+        let left = 25 * 60, timer = null; const out = el.querySelector(".tmr"), go = el.querySelector(".go"), mins = el.querySelector(".mins");
+        const show = () => out.textContent = String(Math.floor(left / 60)).padStart(2, "0") + ":" + String(left % 60).padStart(2, "0");
+        const stop = () => { clearInterval(timer); timer = null; go.textContent = "Start"; };
+        go.onclick = () => { if (timer) return stop(); go.textContent = "Pause";
+          timer = setInterval(() => { if (!el.isConnected) return clearInterval(timer); left--; show(); if (left <= 0) { stop(); out.textContent = "Done!"; } }, 1000); };
+        el.querySelector(".rs").onclick = () => { stop(); left = (+mins.value || 25) * 60; show(); };
+        mins.onchange = () => { stop(); left = (+mins.value || 25) * 60; show(); }; } }
+  };
+
+  /* ---------- Rendering ---------- */
+  function renderGrid() {
+    const p = P(), grid = $("grid"); grid.innerHTML = "";
+    p.blocks.forEach((b, i) => {
+      const t = TYPES[b.type]; if (!t) return;
+      const el = document.createElement("article"); el.className = "card glass";
+      el.innerHTML = t.html(b) + `<div class="ctl only-edit"><span class="grip" draggable="true" title="Drag to rearrange" aria-label="Drag to rearrange">⠿</span>${b.type === "custom" ? `<button class="ghost" data-a="e" aria-label="Edit box">✎</button>` : ""}<button class="ghost" data-a="l" aria-label="Move earlier">◀</button><button class="ghost" data-a="r" aria-label="Move later">▶</button><button class="ghost" data-a="x" aria-label="Remove block">✕</button></div>`;
+      el.querySelector(".ctl").addEventListener("click", e => { const a = e.target.dataset.a; if (!a) return;
+        if (a === "e") return openDlg(b);
+        if (a === "x") p.blocks.splice(i, 1); else { const j = i + (a === "l" ? -1 : 1); if (j < 0 || j >= p.blocks.length) return; [p.blocks[i], p.blocks[j]] = [p.blocks[j], p.blocks[i]]; }
+        save(); renderGrid(); });
+      if (b.wide) el.style.gridColumn = "1 / -1";
+      grid.appendChild(el); if (t.init) t.init(el, b);
+    });
+    paintSys(); paintWx();
+  }
+  function renderLinks() {
+    const p = P();
+    $("links").innerHTML = p.links.map((l, i) => `<a href="${esc(l.url)}" data-i="${i}">${esc(l.name)}<span class="ed only-edit" data-i="${i}" title="Edit link" style="display:inline">✎</span><span class="rm only-edit" data-i="${i}" title="Remove link" style="display:inline">×</span></a>`).join("")
+      + `<button class="ghost only-edit" id="addLink">+ Add link</button>`;
+  }
+  const isEditing = () => document.body.classList.contains("editing");
+  let editingLink = null;
+  function openLinkDlg(i) {
+    editingLink = i; const l = i === null ? null : P().links[i];
+    $("lHead").textContent = l ? "Edit link" : "Add a link"; $("lSave").textContent = l ? "Save" : "Add link";
+    $("lUrl").value = l ? l.url : ""; $("lName").value = l ? l.name : ""; $("lPrev").textContent = "";
+    $("lUrl").dispatchEvent(new Event("input")); $("linkDlg").showModal(); $("lUrl").focus();
+  }
+  $("links").addEventListener("click", e => {
+    if (e.target.id === "addLink") return openLinkDlg(null);
+    const a = e.target.closest("a[data-i]");
+    if (e.target.classList.contains("ed")) { e.preventDefault(); openLinkDlg(+e.target.dataset.i); }
+    else if (e.target.classList.contains("rm")) { e.preventDefault(); P().links.splice(+e.target.dataset.i, 1); save(); renderLinks(); }
+    else if (a && isEditing()) e.preventDefault();   // in edit mode a click selects/drags instead of navigating
+  });
+
+  /* ---------- Drag and drop: links (drag the link itself) and blocks (drag the ⠿ grip). Edit mode only. ---------- */
+  const moveItem = (arr, from, pos) => { const [m] = arr.splice(from, 1); arr.splice(pos > from ? pos - 1 : pos, 0, m); };
+  let dragLink = null, linkPos = null, dragBlock = null, blockPos = null;
+  const clearMarks = () => qsa(".drop-before,.drop-after,.drop-l,.drop-r,.drop-t,.drop-b,.dragging").forEach(x => x.classList.remove("drop-before", "drop-after", "drop-l", "drop-r", "drop-t", "drop-b", "dragging"));
+  const endDrag = () => { dragLink = linkPos = dragBlock = blockPos = null; clearMarks(); };
+  document.addEventListener("dragend", endDrag);
+
+  $("links").addEventListener("dragstart", e => {
+    const a = e.target.closest && e.target.closest("a[data-i]"); if (!a || !isEditing()) return;
+    dragLink = +a.dataset.i; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", a.textContent); a.classList.add("dragging"); });
+  $("links").addEventListener("dragover", e => {
+    if (dragLink === null) return; e.preventDefault(); e.dataTransfer.dropEffect = "move";
+    qsa(".drop-before,.drop-after").forEach(x => x.classList.remove("drop-before", "drop-after"));
+    const a = e.target.closest("a[data-i]"); if (!a) { linkPos = null; return; }
+    const r = a.getBoundingClientRect(), after = e.clientX > r.left + r.width / 2;
+    a.classList.add(after ? "drop-after" : "drop-before"); linkPos = +a.dataset.i + (after ? 1 : 0); });
+  $("links").addEventListener("drop", e => {
+    if (dragLink === null) return; e.preventDefault();
+    if (linkPos !== null) { moveItem(P().links, dragLink, linkPos); save(); }
+    endDrag(); renderLinks(); });
+
+  $("grid").addEventListener("dragstart", e => {
+    const g = e.target.closest && e.target.closest(".grip"); if (!g || !isEditing()) return;
+    const card = g.closest(".card"); dragBlock = [...$("grid").children].indexOf(card);
+    e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "block"); e.dataTransfer.setDragImage(card, 24, 24); card.classList.add("dragging"); });
+  $("grid").addEventListener("dragover", e => {
+    if (dragBlock === null) return; e.preventDefault(); e.dataTransfer.dropEffect = "move";
+    qsa(".drop-l,.drop-r,.drop-t,.drop-b").forEach(x => x.classList.remove("drop-l", "drop-r", "drop-t", "drop-b"));
+    const card = e.target.closest(".card"); if (!card) { blockPos = null; return; }
+    const r = card.getBoundingClientRect(), horiz = r.width < $("grid").clientWidth * .8;
+    const after = horiz ? e.clientX > r.left + r.width / 2 : e.clientY > r.top + r.height / 2;
+    card.classList.add(horiz ? (after ? "drop-r" : "drop-l") : (after ? "drop-b" : "drop-t"));
+    blockPos = [...$("grid").children].indexOf(card) + (after ? 1 : 0); });
+  $("grid").addEventListener("drop", e => {
+    if (dragBlock === null) return; e.preventDefault();
+    if (blockPos !== null) { moveItem(P().blocks, dragBlock, blockPos); save(); }
+    endDrag(); renderGrid(); });
+  function renderTabs() {
+    $("tabs").innerHTML = S.profiles.map(p => `<button class="ghost ${p.id === S.active ? "on" : ""}" data-id="${p.id}">${esc(p.name)}</button>`).join("")
+      + `<button class="ghost only-edit" id="addProfile" aria-label="Add profile">+ Profile</button>`;
+  }
+  $("tabs").addEventListener("click", e => {
+    if (e.target.id === "addProfile") {
+      const p = { id: uid(), name: "New profile", greet: P().greet, accent: "", links: [], blocks: [{ id: uid(), type: "notes", text: "" }] };
+      S.profiles.push(p); S.active = p.id; save(); renderAll(); const n = $("pName"); n.focus(); n.select(); }
+    else if (e.target.dataset.id) { S.active = e.target.dataset.id; save(); renderAll(); }
+  });
+  function renderPanel() {
+    const p = P();
+    $("panel").innerHTML = `<div class="row"><label>Profile name <input type="text" id="pName" value="${esc(p.name)}"></label>
+      <label>Greet me as <input type="text" id="pGreet" value="${esc(p.greet)}"></label>
+      <label>Accent <input type="color" id="pAccent" value="${p.accent || "#8fb0ff"}"></label>
+      ${S.profiles.length > 1 ? `<button class="ghost" id="pDel" style="margin-left:auto">Delete profile</button>` : ""}</div>
+      <div class="row"><span class="sub" style="margin:0">Add a block:</span>${Object.entries(TYPES).filter(([k]) => k !== "custom").map(([k, t]) => `<button class="ghost" data-add="${k}">+ ${t.label}</button>`).join("")}<button id="addCustom">+ Custom box</button></div>
+      <div class="row"><span class="sub" style="margin:0">Search engines:</span>${(S.engines || []).map(en => `<span class="chip">${esc(en.name)} <b data-eng="${en.id}" title="Remove" style="cursor:pointer;color:#f87171">×</b></span>`).join("")}
+        <input type="text" id="engName" placeholder="Name (e.g. Ecosia)" style="width:150px" aria-label="Engine name">
+        <input type="text" id="engUrl" placeholder="https://www.ecosia.org/search?q=%s" style="flex:1;min-width:200px" aria-label="Engine URL, use %s where the query goes">
+        <button class="ghost" id="addEngine">+ Add</button></div>
+      <div class="row"><span class="sub" style="margin:0">Backup:</span>
+        <button class="ghost" id="expBtn">Export settings</button><button class="ghost" id="impBtn">Import settings</button>
+        <input type="file" id="impFile" accept="application/json,.json" hidden>
+        <span class="sub" id="bkMsg" style="margin:0"></span></div>`;
+    $("pName").oninput = e => { p.name = e.target.value || "Profile"; save(); renderTabs(); };
+    $("pGreet").oninput = e => { p.greet = e.target.value; save(); tick(); };
+    $("pAccent").oninput = e => { p.accent = e.target.value; save(); applyAccent(); };
+    if ($("pDel")) $("pDel").onclick = () => {
+      $("delMsg").textContent = `“${p.name}” and all of its links and boxes will be permanently removed. This can’t be undone.`;
+      $("delDlg").showModal(); $("delCancel").focus();
+      $("delForm").onsubmit = e => { e.preventDefault(); S.profiles = S.profiles.filter(x => x !== p); S.active = S.profiles[0].id; save(); renderAll(); $("delDlg").close(); };
+      $("delCancel").onclick = () => $("delDlg").close(); };
+    $("addCustom").onclick = () => openDlg(null);
+    $("expBtn").onclick = () => { const blob = new Blob([JSON.stringify({ hp2: S, engine: store.get("engine"), wxloc: store.get("wxloc") }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "homepage-settings.json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+    $("impBtn").onclick = () => $("impFile").click();
+    $("impFile").onchange = async e => { const f = e.target.files[0]; if (!f) return;
+      try { const d = JSON.parse(await f.text()); if (!d.hp2 || !Array.isArray(d.hp2.profiles) || !d.hp2.profiles.length) throw 0;
+        S = d.hp2; if (d.engine) store.set("engine", d.engine); if (d.wxloc) store.set("wxloc", d.wxloc); save(); fillEngines(); renderAll(); }
+      catch (err) { $("bkMsg").textContent = "That doesn’t look like a settings file."; } };
+    $("addEngine").onclick = () => { const name = $("engName").value.trim(); let url = $("engUrl").value.trim(); if (!name || !url) return;
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+      (S.engines = S.engines || []).push({ id: "c" + uid(), name, url }); save(); fillEngines(); renderPanel(); };
+    qsa("[data-eng]").forEach(x => x.onclick = () => { S.engines = S.engines.filter(en => en.id !== x.dataset.eng); save(); fillEngines(); renderPanel(); });
+    qsa("[data-add]").forEach(btn => btn.onclick = () => { p.blocks.push({ id: uid(), type: btn.dataset.add }); save(); renderGrid(); });
+  }
+  /* ---------- Custom box dialog ---------- */
+  const normUrl = u => /^https?:\/\//i.test(u.trim()) ? u.trim() : "https://" + u.trim();
+  const hostOf = u => { try { return new URL(normUrl(u)).hostname.replace(/^www\./, ""); } catch { return ""; } };
+  $("lUrl").addEventListener("input", () => { const h = hostOf($("lUrl").value); $("lPrev").textContent = h ? "Will show as: " + ($("lName").value.trim() || h) : ""; });
+  $("lName").addEventListener("input", () => $("lUrl").dispatchEvent(new Event("input")));
+  $("lCancel").onclick = () => $("linkDlg").close();
+  $("linkForm").addEventListener("submit", e => { e.preventDefault();
+    const h = hostOf($("lUrl").value); if (!h) { $("lUrl").focus(); return; }
+    const item = { name: $("lName").value.trim() || h, url: normUrl($("lUrl").value) };
+    if (editingLink !== null && P().links[editingLink]) P().links[editingLink] = item; else P().links.push(item);
+    save(); renderLinks(); $("linkDlg").close(); });
+  const dlg = $("dlg"); let editingBlock = null;
+  function syncFields() { const k = $("dKind").value;
+    qsa("#dlg [data-for]").forEach(f => f.style.display = f.dataset.for.split(" ").includes(k) ? "" : "none");
+    $("dBodyLbl").textContent = k === "links" ? "One per line: Name | URL" : "Text"; }
+  function openDlg(b) {
+    editingBlock = b; $("dTitleHead").textContent = b ? "Edit box" : "New custom box";
+    $("dTitle").value = b ? b.title : ""; $("dKind").value = b ? b.kind : "text"; $("dKind").disabled = !!b;
+    $("dBody").value = b ? b.text || "" : ""; $("dUrl").value = b ? b.url || "" : ""; $("dDate").value = b ? b.date || "" : ""; $("dWide").checked = !!(b && b.wide);
+    syncFields(); dlg.showModal(); $("dTitle").focus();
+  }
+  $("dKind").onchange = syncFields;
+  $("dCancel").onclick = () => dlg.close();
+  $("dlgForm").addEventListener("submit", e => { e.preventDefault();
+    const data = { title: $("dTitle").value.trim() || "Untitled", text: $("dBody").value, url: $("dUrl").value.trim(), date: $("dDate").value, wide: $("dWide").checked };
+    if (editingBlock) Object.assign(editingBlock, data); else P().blocks.push({ id: uid(), type: "custom", kind: $("dKind").value, ...data });
+    save(); renderGrid(); dlg.close(); });
+
+  const applyAccent = () => { const a = P().accent; a ? document.documentElement.style.setProperty("--accent", a) : document.documentElement.style.removeProperty("--accent"); };
+  function renderAll() { applyAccent(); renderTabs(); renderLinks(); renderGrid(); renderPanel(); tick(); }
+  $("editBtn").onclick = () => { const on = document.body.classList.toggle("editing"); $("editBtn").textContent = on ? "Done" : "Edit"; $("editBtn").classList.toggle("on", on); };
+
+  /* ---------- Clock ---------- */
+  function tick() {
+    const d = new Date(), h = d.getHours(), g = P().greet;
+    $("clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    $("date").textContent = d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+    $("greeting").textContent = (h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (g ? ", " + g : "");
+  }
+  setInterval(tick, 10000);
+
+  /* ---------- Search ---------- */
+  const ENGINES = { google: "https://www.google.com/search?q=", ddg: "https://duckduckgo.com/?q=", bing: "https://www.bing.com/search?q=", brave: "https://search.brave.com/search?q=" };
+  const SHORTCUTS = { yt: "https://www.youtube.com/results?search_query=", gh: "https://github.com/search?q=", w: "https://en.wikipedia.org/w/index.php?search=", g: ENGINES.google, d: ENGINES.ddg };
+  const ENGINE_NAMES = { google: "Google", ddg: "DuckDuckGo", bing: "Bing", brave: "Brave" };
+  const allEngines = () => { const o = { ...ENGINES }; (S.engines || []).forEach(en => o[en.id] = en.url); return o; };
+  const buildURL = (id, q) => { const t = allEngines()[id] || ENGINES.google, e = encodeURIComponent(q); return t.includes("%s") ? t.replace("%s", e) : t + e; };
+  /* Custom dropdown. The hidden <select id="engine"> stays the source of truth. */
+  let ddIdx = -1;
+  const CHECK = `<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2.5 7.5 3 3 6-7"/></svg>`;
+  const ddOpen = () => $("engDD").classList.contains("open");
+  function renderEngMenu() {
+    const sel = $("engine"), opts = [...sel.options], builtIn = Object.keys(ENGINE_NAMES).length;
+    $("engLabel").textContent = opts[sel.selectedIndex] ? opts[sel.selectedIndex].textContent : "Google";
+    $("engMenu").innerHTML = opts.map((o, i) => (i === builtIn && i > 0 ? `<li class="sep" role="separator"></li>` : "")
+      + `<li role="option" id="engO${i}" data-i="${i}" aria-selected="${o.value === sel.value}"><span>${esc(o.textContent)}</span>${CHECK}</li>`).join("");
+  }
+  function ddHighlight(i) {
+    const items = qsa("#engMenu [role=option]"); if (!items.length) return;
+    ddIdx = (i + items.length) % items.length;
+    items.forEach((li, n) => li.classList.toggle("active", n === ddIdx));
+    items[ddIdx].scrollIntoView({ block: "nearest" });
+    $("engBtn").setAttribute("aria-activedescendant", items[ddIdx].id);
+  }
+  function ddToggle(open) {
+    $("engDD").classList.toggle("open", open); $("engBtn").setAttribute("aria-expanded", open);
+    if (open) ddHighlight($("engine").selectedIndex); else { qsa("#engMenu .active").forEach(li => li.classList.remove("active")); $("engBtn").removeAttribute("aria-activedescendant"); }
+  }
+  function ddChoose(i) {
+    const sel = $("engine"); if (!sel.options[i]) return;
+    sel.selectedIndex = i; sel.dispatchEvent(new Event("change")); ddToggle(false); $("q").focus();
+  }
+  $("engBtn").addEventListener("click", () => ddToggle(!ddOpen()));
+  $("engBtn").addEventListener("keydown", e => {
+    const k = e.key;
+    if (!ddOpen()) { if (k === "ArrowDown" || k === "ArrowUp") { e.preventDefault(); ddToggle(true); } return; }
+    if (k === "ArrowDown") { e.preventDefault(); ddHighlight(ddIdx + 1); }
+    else if (k === "ArrowUp") { e.preventDefault(); ddHighlight(ddIdx - 1); }
+    else if (k === "Home") { e.preventDefault(); ddHighlight(0); }
+    else if (k === "End") { e.preventDefault(); ddHighlight(-1); }
+    else if (k === "Enter" || k === " ") { e.preventDefault(); ddChoose(ddIdx); }
+    else if (k === "Escape") { e.preventDefault(); ddToggle(false); }
+    else if (k === "Tab") ddToggle(false);
+  });
+  $("engMenu").addEventListener("mousemove", e => { const li = e.target.closest("[role=option]"); if (li && +li.dataset.i !== ddIdx) ddHighlight(+li.dataset.i); });
+  $("engMenu").addEventListener("click", e => { const li = e.target.closest("[role=option]"); if (li) ddChoose(+li.dataset.i); });
+  document.addEventListener("pointerdown", e => { if (ddOpen() && !$("engDD").contains(e.target)) ddToggle(false); });
+
+  function fillEngines() {
+    const sel = $("engine"), cur = store.get("engine") || sel.value;
+    sel.innerHTML = Object.entries(ENGINE_NAMES).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")
+      + (S.engines || []).map(en => `<option value="${en.id}">${esc(en.name)}</option>`).join("");
+    sel.value = allEngines()[cur] ? cur : "google";
+    renderEngMenu();
+  }
+  fillEngines();
+  $("engine").addEventListener("change", e => { store.set("engine", e.target.value); renderEngMenu(); });
+  const isUrl = s => /^https?:\/\//i.test(s) || /^[^\s]+\.[a-z]{2,}(\/[^\s]*)?$/i.test(s);
+  $("search").addEventListener("submit", e => {
+    e.preventDefault(); const raw = $("q").value.trim(); if (!raw) return;
+    const [first, ...rest] = raw.split(/\s+/);
+    if (SHORTCUTS[first.toLowerCase()] && rest.length) { location.href = SHORTCUTS[first.toLowerCase()] + encodeURIComponent(rest.join(" ")); return; }
+    if (isUrl(raw)) { location.href = /^https?:\/\//i.test(raw) ? raw : "https://" + raw; return; }
+    location.href = buildURL($("engine").value, raw);
+  });
+  document.addEventListener("keydown", e => { if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $("q").focus(); } });
+
+  /* ---------- Weather: GPS, then IP lookup, then last known or fallback ---------- */
+  const WMO = { 0:"Clear",1:"Mostly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snow",75:"Heavy snow",80:"Showers",81:"Showers",82:"Heavy showers",95:"Thunderstorm",96:"Thunderstorm",99:"Thunderstorm" };
+  const sym = WEATHER.unit === "celsius" ? "°C" : "°F", getJSON = async u => (await fetch(u)).json();
+  const gps = () => new Promise((res, rej) => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), rej, { timeout: 8000, maximumAge: 600000 }) : rej());
+  // Only touch GPS if the browser already granted it, so a new tab never triggers a permission prompt.
+  const gpsAllowed = async () => { try { return (await navigator.permissions.query({ name: "geolocation" })).state === "granted"; } catch (e) { return false; } };
+  async function nameFor(l) { try { const d = await getJSON(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${l.lat}&longitude=${l.lon}&localityLanguage=en`);
+    return [d.city || d.locality, (d.principalSubdivisionCode || "").split("-").pop()].filter(Boolean).join(", "); } catch (e) { return "Your location"; } }
+  async function whereAmI() {
+    const pref = wxPref(); if (pref.mode === "custom" && isFinite(pref.lat) && isFinite(pref.lon)) return pref;
+    let loc;
+    try { if (!(await gpsAllowed())) throw 0; loc = await gps(); loc.label = await nameFor(loc); }
+    catch (e) { try { const d = await getJSON("https://ipwho.is/"); if (!d.success) throw 0; loc = { lat: d.latitude, lon: d.longitude, label: [d.city, d.region_code].filter(Boolean).join(", ") }; }
+      catch (e2) { try { loc = JSON.parse(store.get("loc")); } catch (e3) {} loc = loc || WEATHER; } }
+    store.set("loc", JSON.stringify(loc)); return loc;
+  }
+  async function loadWeather() {
+    try {
+      const loc = await whereAmI();
+      const d = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&temperature_unit=${WEATHER.unit}&wind_speed_unit=mph&timezone=auto&forecast_days=1`), c = d.current;
+      wxHTML = `<div class="temp">${Math.round(c.temperature_2m)}${sym}</div><div class="sub">${WMO[c.weather_code] || "—"} · ${esc(loc.label || "Your location")}</div>
+        <dl><dt>High / Low</dt><dd>${Math.round(d.daily.temperature_2m_max[0])}° / ${Math.round(d.daily.temperature_2m_min[0])}°</dd><dt>Wind</dt><dd>${Math.round(c.wind_speed_10m)} mph</dd></dl>`;
+    } catch (e) { wxHTML = `<div class="sub">Weather unavailable (offline?)</div>`; }
+    paintWx();
+  }
+
+  /* ---------- Weather location editor: current location, or a place you search for ---------- */
+  const wxPref = () => { try { return JSON.parse(store.get("wxloc")) || { mode: "auto" }; } catch (e) { return { mode: "auto" }; } };
+  const wxMode = () => document.querySelector("input[name=wxMode]:checked").value;
+  let wxResults = [], wxPick = null;
+  function wxSync() { const c = wxMode() === "custom"; $("wxCustom").style.display = c ? "" : "none"; $("wxGpsRow").style.display = c ? "none" : ""; }
+  function openWx() {
+    const p = wxPref(); wxResults = []; wxPick = null; $("wxRes").innerHTML = ""; $("wxQ").value = "";
+    document.querySelector(`input[name=wxMode][value=${p.mode === "custom" ? "custom" : "auto"}]`).checked = true;
+    $("wxMsg").textContent = p.mode === "custom" ? "Currently showing: " + p.label : "Currently using your approximate location (no prompt). Tap “Use precise GPS” for exact.";
+    wxSync(); $("wxDlg").showModal(); if (p.mode === "custom") $("wxQ").focus();
+  }
+  async function wxFind() {
+    const raw = $("wxQ").value.trim(); if (!raw) return;
+    const [name, ...rest] = raw.split(",").map(x => x.trim()), hint = rest.join(" ").toLowerCase();
+    $("wxMsg").textContent = "Searching…"; $("wxRes").innerHTML = ""; wxPick = null;
+    try {
+      const d = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=10&language=en&format=json`);
+      wxResults = (d.results || []).map(x => ({ lat: x.latitude, lon: x.longitude, label: [x.name, x.admin1 || x.country_code].filter(Boolean).join(", "), sub: [x.admin1, x.country].filter(Boolean).join(", "),
+        hay: [x.admin1, x.country, x.country_code, (x.admin1 || "").split(/\s+/).map(w => w[0]).join("")].join(" ").toLowerCase() }));
+      // "Secaucus, NJ": float results that match the part after the comma
+      const score = x => hint.split(/\s+/).filter(w => w && x.hay.split(" ").some(h => h === w || (w.length > 2 && h.includes(w)))).length;
+      if (hint) wxResults.sort((a, b) => score(b) - score(a));
+      $("wxRes").innerHTML = wxResults.map((r, i) => `<button type="button" class="ghost wxopt" role="option" data-i="${i}">${esc(r.label)}<small>${esc(r.sub)}</small></button>`).join("");
+      $("wxMsg").textContent = wxResults.length ? "Pick a place:" : "No places found. Try just the city name or a ZIP code.";
+    } catch (e) { $("wxMsg").textContent = "Couldn’t search right now (offline?)."; }
+  }
+  $("wxFind").onclick = wxFind;
+  $("wxGps").onclick = async () => {
+    $("wxMsg").textContent = "Waiting for your browser…";
+    try { await gps(); store.set("wxloc", JSON.stringify({ mode: "auto" })); $("wxMsg").textContent = "Precise GPS is on."; wxHTML = ""; paintWx(); loadWeather(); }
+    catch (e) { $("wxMsg").textContent = "GPS wasn’t allowed, so your approximate location will be used."; } };
+  $("wxQ").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); wxFind(); } });
+  qsa("input[name=wxMode]").forEach(r => r.onchange = wxSync);
+  $("wxRes").addEventListener("click", e => { const b = e.target.closest(".wxopt"); if (!b) return;
+    wxPick = wxResults[+b.dataset.i]; qsa(".wxopt").forEach(x => x.classList.toggle("on", x === b)); $("wxMsg").textContent = "Selected: " + wxPick.label; });
+  $("wxCancel").onclick = () => $("wxDlg").close();
+  $("wxForm").addEventListener("submit", e => { e.preventDefault();
+    if (wxMode() === "custom") {
+      const pick = wxPick || (wxPref().mode === "custom" ? wxPref() : null);
+      if (!pick) { $("wxMsg").textContent = "Search for a place and pick one first."; return; }
+      store.set("wxloc", JSON.stringify({ mode: "custom", label: pick.label, lat: pick.lat, lon: pick.lon }));
+    } else store.set("wxloc", JSON.stringify({ mode: "auto" }));
+    $("wxDlg").close(); wxHTML = ""; paintWx(); loadWeather(); });
+
+  /* ---------- Animated background + FPS ---------- */
+  const cv = $("bg"), ctx = cv.getContext("2d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, pts = [], mouse = { x: -999, y: -999 };
+  function resize() { const r = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0);
+    pts = Array.from({ length: Math.min(90, Math.floor(W * H / 16000)) }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3 })); }
+  addEventListener("resize", resize); addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; }); resize();
+  let frames = 0, last = performance.now();
+  function draw() {
+    ctx.clearRect(0, 0, W, H); const col = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+    for (const p of pts) { if (!reduce) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+      ctx.globalAlpha = .6; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, 6.283); ctx.fill(); }
+    ctx.strokeStyle = col; ctx.lineWidth = 1;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) { const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+        if (d < 130) { ctx.globalAlpha = (1 - d / 130) * .22; ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke(); } }
+      const md = Math.hypot(pts[i].x - mouse.x, pts[i].y - mouse.y);
+      if (md < 170) { ctx.globalAlpha = (1 - md / 170) * .5; ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); }
+    }
+    frames++; const now = performance.now();
+    if (now - last >= 1000) { fps = Math.round(frames * 1000 / (now - last)); frames = 0; last = now; sysRows.FPS = fps; paintSys(); }
+    if (!reduce) requestAnimationFrame(draw);
+  }
+
+  renderAll(); loadWeather(); setInterval(loadWeather, 15 * 60000); draw();
+</script>
+
+<script>
+  // Keep keyboard focus in the page (the search box) instead of the browser's address bar.
+  // Browsers often grab the address bar a moment AFTER a new tab loads, so we re-assert focus
+  // a few times, and stop the moment you click, type or scroll so we never fight you.
+  (() => {
+    const q = document.getElementById("q"); let stopped = false;
+    ["pointerdown", "keydown", "wheel", "touchstart"].forEach(ev => addEventListener(ev, () => { stopped = true; }, { capture: true, once: true }));
+    const grab = () => {
+      if (stopped || document.hidden || document.querySelector("dialog[open]")) return;
+      if (document.activeElement !== q) { window.focus(); q.focus({ preventScroll: true }); }
+    };
+    grab();
+    [30, 100, 250, 500, 900, 1500].forEach(ms => setTimeout(grab, ms));
+    addEventListener("load", grab); addEventListener("pageshow", grab); addEventListener("focus", grab);
+    document.addEventListener("visibilitychange", grab);
+  })();
+</script>
+
+
+</body>
+</html>
