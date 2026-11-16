@@ -1,7 +1,3 @@
-// Public default settings. Safe to commit.
-// To use your own defaults: copy this file to config.js (which is git-ignored) and edit it.
-//   cp config.example.js config.js
-// config.js is loaded first, so if it exists, these values are ignored.
 window.HOMEPAGE_CONFIG = window.HOMEPAGE_CONFIG || {
   greet: "friend",
   profileName: "Home",
