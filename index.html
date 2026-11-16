@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home</title>
 <style>
-  /* ===== THEME: edit these colors/fonts to taste ===== */
+  /* ===== THEME: edit these colors/fonts to personal preference ===== */
   :root {
     --bg: #0a0e18; --glass: rgba(24, 32, 51, .55); --border: rgba(143, 176, 255, .18);
     --text: #e8ecf4; --muted: #8d9ab8; --accent: #8fb0ff; --good: #6ee7b7;
@@ -595,7 +595,7 @@
       const d = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=10&language=en&format=json`);
       wxResults = (d.results || []).map(x => ({ lat: x.latitude, lon: x.longitude, label: [x.name, x.admin1 || x.country_code].filter(Boolean).join(", "), sub: [x.admin1, x.country].filter(Boolean).join(", "),
         hay: [x.admin1, x.country, x.country_code, (x.admin1 || "").split(/\s+/).map(w => w[0]).join("")].join(" ").toLowerCase() }));
-      // "Secaucus, NJ": float results that match the part after the comma
+
       const score = x => hint.split(/\s+/).filter(w => w && x.hay.split(" ").some(h => h === w || (w.length > 2 && h.includes(w)))).length;
       if (hint) wxResults.sort((a, b) => score(b) - score(a));
       $("wxRes").innerHTML = wxResults.map((r, i) => `<button type="button" class="ghost wxopt" role="option" data-i="${i}">${esc(r.label)}<small>${esc(r.sub)}</small></button>`).join("");
@@ -647,9 +647,7 @@
 </script>
 
 <script>
-  // Keep keyboard focus in the page (the search box) instead of the browser's address bar.
-  // Browsers often grab the address bar a moment AFTER a new tab loads, so we re-assert focus
-  // a few times, and stop the moment you click, type or scroll so we never fight you.
+ 
   (() => {
     const q = document.getElementById("q"); let stopped = false;
     ["pointerdown", "keydown", "wheel", "touchstart"].forEach(ev => addEventListener(ev, () => { stopped = true; }, { capture: true, once: true }));
