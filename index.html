@@ -5,24 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home</title>
 <style>
-  /* ===== THEME: edit these colors/fonts to personal preference ===== */
-  :root {
-    --bg: #0a0e18; --glass: rgba(24, 32, 51, .55); --border: rgba(143, 176, 255, .18);
-    --text: #e8ecf4; --muted: #8d9ab8; --accent: #8fb0ff; --good: #6ee7b7;
-    --font: "Avenir Next", ui-rounded, system-ui, -apple-system, sans-serif;
-    --mono: ui-monospace, "SF Mono", Menlo, monospace; --radius: 16px;
+  /* ===== THEMES: fixed palettes and type systems, no blur or glow ===== */
+  :root, [data-theme="minimal"] {
+    --bg:#f4f2ed; --panel:#fbfaf7; --border:#d7d4cc; --text:#1a1a1a; --muted:#6b6a66;
+    --accent:#9a3b2e; --good:#3f6b4a;
+    --font:Arial, Helvetica, "Segoe UI", sans-serif;
+    --mono:"Courier New", Consolas, monospace;
+    --radius:2px; --bw:1px;
   }
-  @media (prefers-color-scheme: light) {
-    :root { --bg:#eef1f8; --glass:rgba(255,255,255,.65); --border:rgba(47,85,212,.18);
-            --text:#151a28; --muted:#5a6684; --accent:#2f55d4; --good:#0f9d6b; }
+  [data-theme="terminal"] {
+    --bg:#0a0a06; --panel:#121206; --border:#5c4a1f; --text:#ffb000; --muted:#a87b1c;
+    --accent:#ffcf66; --good:#ffcf66;
+    --font:"Courier New", Consolas, monospace; --mono:"Courier New", Consolas, monospace;
+    --radius:0; --bw:1px;
+  }
+  [data-theme="win95"] {
+    --bg:#c0c0c0; --panel:#c0c0c0; --border:#404040; --text:#000000; --muted:#4a4a4a;
+    --accent:#000080; --good:#006400;
+    --font:Tahoma, "MS Sans Serif", Arial, sans-serif; --mono:"Courier New", monospace;
+    --radius:0; --bw:2px;
+  }
+  [data-theme="analog"] {
+    --bg:#efe1c9; --panel:#f6ecd9; --border:#8a6b4a; --text:#3a2415; --muted:#7a6247;
+    --accent:#b4452a; --good:#5b6b3a;
+    --font:Georgia, "Times New Roman", serif; --mono:"Courier New", monospace;
+    --radius:2px; --bw:2px;
+  }
+  [data-theme="industrial"] {
+    --bg:#101418; --panel:#151b20; --border:#2e3940; --text:#c9d3da; --muted:#7d8b95;
+    --accent:#e0a23c; --good:#7fb08a;
+    --font:"Segoe UI", Arial, sans-serif; --mono:Consolas, "Courier New", monospace;
+    --radius:2px; --bw:1px;
+  }
+  [data-theme="swiss"] {
+    --bg:#fafafa; --panel:#ffffff; --border:#111111; --text:#111111; --muted:#555555;
+    --accent:#d6202b; --good:#167340;
+    --font:Arial, Helvetica, sans-serif; --mono:"Courier New", monospace;
+    --radius:0; --bw:2px;
+  }
+  [data-theme="monochrome"] {
+    --bg:#08090a; --panel:#111315; --border:#2a2e32; --text:#b9c0c7; --muted:#6d757d;
+    --accent:#7fd1c1; --good:#7fd1c1;
+    --font:Consolas, "Courier New", monospace; --mono:Consolas, monospace;
+    --radius:0; --bw:1px;
   }
   /* ====================================================== */
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; justify-content: center; padding: 24px 20px 48px; }
-  #bg { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
   main { position: relative; z-index: 1; width: 100%; max-width: 920px; }
-  .glass { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .glass { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius); }
+  [data-theme="terminal"] body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.28) 2px 4px); }
+  [data-theme="industrial"] body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image: linear-gradient(rgba(201,211,218,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(201,211,218,.035) 1px, transparent 1px);
+    background-size: 32px 32px; }
+  [data-theme="win95"] .glass { border-color:#ffffff #404040 #404040 #ffffff; box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080; }
+  [data-theme="win95"] .card h2 { display:block; background:#000080; color:#ffffff; padding:5px 8px; margin:-20px -20px 14px; }
+  [data-theme="analog"] .card h2, [data-theme="swiss"] .card h2 { border-bottom: var(--bw) solid var(--border); padding-bottom:8px; }
   button { background: var(--accent); color: var(--bg); border: 0; border-radius: 10px; font: inherit; font-weight: 600; padding: 9px 16px; cursor: pointer; }
   button.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); font-weight: 500; }
   button.ghost.on, button.ghost:hover { border-color: var(--accent); color: var(--accent); }
@@ -31,36 +71,32 @@
   input::placeholder, textarea::placeholder { color: var(--muted); }
 
   .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .icon-btn { position: fixed; top: 14px; right: 18px; z-index: 60; padding: 7px 9px; line-height: 0; }
+  .icon-btn svg { width: 18px; height: 18px; display: block; }
+  body.editing .panel { padding-top: 44px; }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
 
   .hero { text-align: center; margin-top: 4vh; }
   .date { color: var(--muted); font-size: 1.05rem; margin: 0 0 10px; }
-  .clock { font-family: var(--mono); font-size: clamp(3.2rem, 11vw, 6.5rem); font-weight: 200; letter-spacing: -.05em; margin: 0; line-height: 1; text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .clock { font-family: var(--mono); font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 400; letter-spacing: -.02em; margin: 0; line-height: 1.1; }
   .greeting { color: var(--text); font-size: 1.5rem; font-weight: 500; margin: 12px 0 32px; }
-  #search { display: flex; align-items: center; gap: 10px; max-width: 640px; margin: 0 auto; padding: 6px 6px 6px 18px; transition: border-color .15s, box-shadow .15s; }
+  #search { display: flex; align-items: center; gap: 10px; max-width: 640px; margin: 0 auto; padding: 6px 6px 6px 18px; transition: border-color .15s; }
   #search { position: relative; z-index: 50; }
-  #search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 40px color-mix(in srgb, var(--accent) 20%, transparent); }
+  #search:focus-within { border-color: var(--accent); }
   #q { flex: 1; border: 0; outline: 0; font-size: 1.1rem; padding: 12px 0; }
   #search select { color: var(--muted); font-size: .85rem; }
-  .hint { color: var(--muted); font-size: .8rem; text-align: center; margin: 10px 0 0; }
-  .hint code { font-family: var(--mono); color: var(--text); }
-
   .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 28px 0 32px; }
-  .links a { color: var(--text); text-decoration: none; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--glass); font-size: .95rem; }
+  .links a { color: var(--text); text-decoration: none; padding: 8px 16px; border-radius: var(--radius); border: var(--bw) solid var(--border); background: var(--panel); font-size: .95rem; }
   .links a:hover { border-color: var(--accent); color: var(--accent); }
   .links .rm { margin-left: 8px; color: #f87171; cursor: pointer; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
   .card { padding: 20px; position: relative; }
   .card h2 { margin: 0 0 14px; font-size: .95rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 10px var(--good); }
-  .dot.off { background: #f87171; box-shadow: 0 0 10px #f87171; }
   dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; font-family: var(--mono); font-size: .82rem; }
   dt { color: var(--muted); } dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
   .temp { font-size: 3rem; font-weight: 300; line-height: 1; }
   .sub { color: var(--muted); margin: 6px 0 14px; }
-  .meter { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 14px; }
-  .meter i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
   textarea { width: 100%; height: 150px; resize: vertical; background: transparent; color: var(--text); border: 0; outline: 0; font-family: var(--mono); font-size: .85rem; line-height: 1.6; }
   .todo-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; cursor: pointer; }
   .todo-row.done span { text-decoration: line-through; color: var(--muted); }
@@ -85,16 +121,16 @@
 
   /* search engine dropdown */
   .dd { position: relative; }
-  .dd-btn { display: flex; align-items: center; gap: 8px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-weight: 500; font-size: .88rem; padding: 9px 10px 9px 14px; white-space: nowrap; transition: border-color .15s, color .15s, background .15s; }
-  .dd-btn:hover, .dd-btn[aria-expanded=true] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .dd-btn { display: flex; align-items: center; gap: 8px; background: transparent; color: var(--text); border: var(--bw) solid var(--border); border-radius: var(--radius); font-weight: 500; font-size: .88rem; padding: 9px 10px 9px 14px; white-space: nowrap; }
+  .dd-btn:hover, .dd-btn[aria-expanded=true] { border-color: var(--accent); color: var(--accent); }
   .dd-btn svg { width: 12px; height: 12px; flex: none; transition: transform .18s; }
   .dd-btn[aria-expanded=true] svg { transform: rotate(180deg); }
   .dd-menu { position: absolute; right: 0; top: calc(100% + 10px); z-index: 30; min-width: 210px; max-height: 300px; overflow-y: auto; margin: 0; padding: 6px; list-style: none;
-    background: color-mix(in srgb, var(--bg) 90%, var(--accent) 6%); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.4);
-    visibility: hidden; opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right; transition: opacity .13s, transform .13s, visibility .13s; }
-  .dd.open .dd-menu { visibility: visible; opacity: 1; transform: none; }
-  .dd-menu li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 12px; border-radius: 9px; cursor: pointer; font-size: .92rem; }
-  .dd-menu li.active { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+    background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius);
+    visibility: hidden; opacity: 0; transition: opacity .13s, visibility .13s; }
+  .dd.open .dd-menu { visibility: visible; opacity: 1; }
+  .dd-menu li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 12px; border-radius: var(--radius); cursor: pointer; font-size: .92rem; }
+  .dd-menu li.active { text-decoration: underline; }
   .dd-menu li[aria-selected=true] { color: var(--accent); font-weight: 600; }
   .dd-menu li svg { width: 14px; height: 14px; flex: none; opacity: 0; }
   .dd-menu li[aria-selected=true] svg { opacity: 1; }
@@ -127,17 +163,16 @@
   .fld textarea { height: 110px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; background: transparent; color: var(--text); }
   .fld.chk { flex-direction: row; align-items: center; gap: 8px; }
   .dlg-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
-  .chip { border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: .85rem; }
+  .chip { border: var(--bw) solid var(--border); border-radius: var(--radius); padding: 4px 10px; font-size: .85rem; }
   .panel label { color: var(--muted); font-size: .85rem; display: flex; align-items: center; gap: 8px; }
   input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--border); background: none; border-radius: 8px; }
 </style>
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
 <main>
   <div class="bar-top">
     <div class="tabs" id="tabs"></div>
-    <button class="ghost" id="editBtn">Edit</button>
+    <button class="ghost icon-btn" id="editBtn" title="Edit settings" aria-label="Edit settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
   </div>
 
   <section class="panel glass only-edit" id="panel"></section>
@@ -161,7 +196,6 @@
       </div>
       <button type="submit">Search</button>
     </form>
-    <p class="hint">Start with a shortcut to search a specific site: <code>yt</code> YouTube · <code>gh</code> GitHub · <code>w</code> Wikipedia · <code>g</code> Google · <code>d</code> DuckDuckGo<br>For example, <code>yt lofi beats</code>. Press <code>/</code> to jump to the search bar.</p>
   </section>
 
   <nav class="links" id="links"></nav>
@@ -244,6 +278,12 @@
   if (!S || !S.profiles || !S.profiles.length) S = DEFAULT();
   const save = () => store.set("hp2", JSON.stringify(S));
   const P = () => S.profiles.find(p => p.id === S.active) || S.profiles[0];
+  const THEMES = ["minimal", "terminal", "win95", "analog", "industrial", "swiss", "monochrome"];
+  function applyTheme() {
+    const t = store.get("theme") || "minimal";
+    document.documentElement.dataset.theme = THEMES.includes(t) ? t : "minimal";
+  }
+  let editingShortcut = null;
 
   /* ---------- Shared live data ---------- */
   const ua = navigator.userAgent;
@@ -251,30 +291,23 @@
     OS: /Mac OS X/.test(ua) ? "macOS" : /iPhone|iPad/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Unknown",
     Browser: (() => { const m = ua.match(/(Edg|Chrome|Firefox)\/(\d+)/); if (m) return (m[1] === "Edg" ? "Edge" : m[1]) + " " + m[2];
                       const s = ua.match(/Version\/([\d.]+).*Safari/); return s ? "Safari " + s[1] : "Browser"; })(),
-    "CPU cores": navigator.hardwareConcurrency || "n/a",
-    GPU: (() => { try { const gl = document.createElement("canvas").getContext("webgl"), x = gl.getExtension("WEBGL_debug_renderer_info");
-                  return (gl.getParameter(x ? x.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || "").replace(/ANGLE \(|\)/g, "").slice(0, 28) || "n/a"; } catch (e) { return "n/a"; } })(),
     Screen: `${screen.width}×${screen.height} @${window.devicePixelRatio}x`,
-    Theme: matchMedia("(prefers-color-scheme: dark)").matches ? "Dark" : "Light",
-    Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, Language: navigator.language,
-    Battery: null, Session: "0m", FPS: "…"
+    Network: navigator.onLine ? "Online" : "Offline",
+    Session: "0m"
   };
-  let fps = 0, wxHTML = "";
+  let wxHTML = "";
   function paintSys() {
-    qsa(".sys").forEach(dl => dl.innerHTML = Object.entries(sysRows).filter(([, v]) => v !== null).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join(""));
-    qsa(".fpsbar").forEach(b => b.style.width = Math.min(100, fps / .6) + "%");
-    qsa(".netdot").forEach(d => d.className = "dot netdot" + (navigator.onLine ? "" : " off"));
+    qsa(".sys").forEach(dl => dl.innerHTML = Object.entries(sysRows).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join(""));
   }
   const paintWx = () => qsa(".wx").forEach(e => e.innerHTML = wxHTML || `<div class="sub">Loading…</div>`);
-  addEventListener("online", paintSys); addEventListener("offline", paintSys);
+  addEventListener("online", () => { sysRows.Network = "Online"; paintSys(); });
+  addEventListener("offline", () => { sysRows.Network = "Offline"; paintSys(); });
   const t0 = Date.now();
   setInterval(() => { const m = Math.floor((Date.now() - t0) / 60000); sysRows.Session = m < 60 ? m + "m" : Math.floor(m / 60) + "h " + (m % 60) + "m"; paintSys(); }, 30000);
-  if (navigator.getBattery) navigator.getBattery().then(b => { const u = () => { sysRows.Battery = Math.round(b.level * 100) + "%" + (b.charging ? " ⚡" : ""); paintSys(); };
-    u(); b.addEventListener("levelchange", u); b.addEventListener("chargingchange", u); });
 
   /* ---------- Block types ---------- */
   const TYPES = {
-    system: { label: "System", html: () => `<h2><span class="dot netdot"></span>System</h2><dl class="sys"></dl><div class="meter" title="Frame rate"><i class="fpsbar"></i></div>`, init: paintSys },
+    system: { label: "System", html: () => `<h2>System</h2><dl class="sys"></dl>`, init: paintSys },
     weather: { label: "Weather", html: () => `<h2>Weather<button type="button" class="ghost wx-loc" title="Change location">Location</button></h2><div class="wx"></div>`,
       init: el => { paintWx(); el.querySelector(".wx-loc").onclick = openWx; } },
     notes: { label: "Notes", html: b => `<h2>Scratchpad</h2><textarea placeholder="Jot something down. Saved automatically." aria-label="Notes">${esc(b.text || "")}</textarea>`,
@@ -397,7 +430,7 @@
     if (blockPos !== null) { moveItem(P().blocks, dragBlock, blockPos); save(); }
     endDrag(); renderGrid(); });
   function renderTabs() {
-    $("tabs").innerHTML = S.profiles.map(p => `<button class="ghost ${p.id === S.active ? "on" : ""}" data-id="${p.id}">${esc(p.name)}</button>`).join("")
+    $("tabs").innerHTML = (S.profiles.length > 1 ? S.profiles.map(p => `<button class="ghost ${p.id === S.active ? "on" : ""}" data-id="${p.id}">${esc(p.name)}</button>`).join("") : "")
       + `<button class="ghost only-edit" id="addProfile" aria-label="Add profile">+ Profile</button>`;
   }
   $("tabs").addEventListener("click", e => {
@@ -412,11 +445,20 @@
       <label>Greet me as <input type="text" id="pGreet" value="${esc(p.greet)}"></label>
       <label>Accent <input type="color" id="pAccent" value="${p.accent || "#8fb0ff"}"></label>
       ${S.profiles.length > 1 ? `<button class="ghost" id="pDel" style="margin-left:auto">Delete profile</button>` : ""}</div>
+      <div class="row"><label>Theme <select id="themeSel">
+        <option value="minimal">Minimal</option>
+        <optgroup label="Retro"><option value="terminal">Terminal / CRT</option><option value="win95">Windows 95</option><option value="analog">Analog paper</option></optgroup>
+        <optgroup label="Futuristic"><option value="industrial">Industrial</option><option value="swiss">Swiss</option><option value="monochrome">Monochrome</option></optgroup>
+      </select></label></div>
       <div class="row"><span class="sub" style="margin:0">Add a block:</span>${Object.entries(TYPES).filter(([k]) => k !== "custom").map(([k, t]) => `<button class="ghost" data-add="${k}">+ ${t.label}</button>`).join("")}<button id="addCustom">+ Custom box</button></div>
       <div class="row"><span class="sub" style="margin:0">Search engines:</span>${(S.engines || []).map(en => `<span class="chip">${esc(en.name)} <b data-eng="${en.id}" title="Remove" style="cursor:pointer;color:#f87171">×</b></span>`).join("")}
         <input type="text" id="engName" placeholder="Name (e.g. Ecosia)" style="width:150px" aria-label="Engine name">
         <input type="text" id="engUrl" placeholder="https://www.ecosia.org/search?q=%s" style="flex:1;min-width:200px" aria-label="Engine URL, use %s where the query goes">
         <button class="ghost" id="addEngine">+ Add</button></div>
+      <div class="row"><span class="sub" style="margin:0">Shortcuts:</span>${(S.shortcuts || []).map(sc => `<span class="chip">${esc(sc.key)} <span style="color:var(--muted)">${esc(sc.url.replace(/^https?:\/\//, "").slice(0, 22))}</span> <b data-sc-e="${esc(sc.key)}" title="Edit" style="cursor:pointer;color:var(--accent)">✎</b> <b data-sc-x="${esc(sc.key)}" title="Remove" style="cursor:pointer;color:#f87171">×</b></span>`).join("")}
+        <input type="text" id="scKey" placeholder="keyword" style="width:110px" aria-label="Shortcut keyword">
+        <input type="text" id="scUrl" placeholder="https://site/?q=%s" style="flex:1;min-width:200px" aria-label="Shortcut URL, use %s where the query goes">
+        <button class="ghost" id="addShortcut">+ Add</button></div>
       <div class="row"><span class="sub" style="margin:0">Backup:</span>
         <button class="ghost" id="expBtn">Export settings</button><button class="ghost" id="impBtn">Import settings</button>
         <input type="file" id="impFile" accept="application/json,.json" hidden>
@@ -424,23 +466,41 @@
     $("pName").oninput = e => { p.name = e.target.value || "Profile"; save(); renderTabs(); };
     $("pGreet").oninput = e => { p.greet = e.target.value; save(); tick(); };
     $("pAccent").oninput = e => { p.accent = e.target.value; save(); applyAccent(); };
+    $("themeSel").value = store.get("theme") || "minimal";
+    $("themeSel").onchange = e => { store.set("theme", e.target.value); applyTheme(); };
     if ($("pDel")) $("pDel").onclick = () => {
       $("delMsg").textContent = `“${p.name}” and all of its links and boxes will be permanently removed. This can’t be undone.`;
       $("delDlg").showModal(); $("delCancel").focus();
       $("delForm").onsubmit = e => { e.preventDefault(); S.profiles = S.profiles.filter(x => x !== p); S.active = S.profiles[0].id; save(); renderAll(); $("delDlg").close(); };
       $("delCancel").onclick = () => $("delDlg").close(); };
     $("addCustom").onclick = () => openDlg(null);
-    $("expBtn").onclick = () => { const blob = new Blob([JSON.stringify({ hp2: S, engine: store.get("engine"), wxloc: store.get("wxloc") }, null, 2)], { type: "application/json" });
+    $("expBtn").onclick = () => { const blob = new Blob([JSON.stringify({ hp2: S, engine: store.get("engine"), wxloc: store.get("wxloc"), theme: store.get("theme") }, null, 2)], { type: "application/json" });
       const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "homepage-settings.json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
     $("impBtn").onclick = () => $("impFile").click();
     $("impFile").onchange = async e => { const f = e.target.files[0]; if (!f) return;
       try { const d = JSON.parse(await f.text()); if (!d.hp2 || !Array.isArray(d.hp2.profiles) || !d.hp2.profiles.length) throw 0;
-        S = d.hp2; if (d.engine) store.set("engine", d.engine); if (d.wxloc) store.set("wxloc", d.wxloc); save(); fillEngines(); renderAll(); }
+        S = d.hp2; if (d.engine) store.set("engine", d.engine); if (d.wxloc) store.set("wxloc", d.wxloc); if (d.theme) store.set("theme", d.theme);
+        ensureShortcuts(); applyTheme(); save(); fillEngines(); renderAll(); }
       catch (err) { $("bkMsg").textContent = "That doesn’t look like a settings file."; } };
     $("addEngine").onclick = () => { const name = $("engName").value.trim(); let url = $("engUrl").value.trim(); if (!name || !url) return;
       if (!/^https?:\/\//i.test(url)) url = "https://" + url;
       (S.engines = S.engines || []).push({ id: "c" + uid(), name, url }); save(); fillEngines(); renderPanel(); };
     qsa("[data-eng]").forEach(x => x.onclick = () => { S.engines = S.engines.filter(en => en.id !== x.dataset.eng); save(); fillEngines(); renderPanel(); });
+    $("addShortcut").onclick = () => {
+      const key = $("scKey").value.trim().toLowerCase(); let url = $("scUrl").value.trim();
+      if (!/^[a-z0-9]{1,20}$/.test(key) || !url) return;
+      url = normUrl(url);
+      const list = S.shortcuts || (S.shortcuts = []);
+      const oldKey = editingShortcut;
+      if (oldKey && oldKey !== key && list.some(s => s.key === key)) return;
+      const existing = list.find(s => s.key === (oldKey || key));
+      if (existing) { existing.key = key; existing.url = url; }
+      else if (!list.some(s => s.key === key)) list.push({ key, url });
+      editingShortcut = null; save(); renderPanel(); };
+    qsa("[data-sc-e]").forEach(x => x.onclick = () => { const sc = S.shortcuts.find(s => s.key === x.dataset.scE); if (!sc) return;
+      editingShortcut = sc.key; $("scKey").value = sc.key; $("scUrl").value = sc.url; $("scKey").focus(); });
+    qsa("[data-sc-x]").forEach(x => x.onclick = () => { S.shortcuts = S.shortcuts.filter(s => s.key !== x.dataset.scX);
+      if (editingShortcut === x.dataset.scX) editingShortcut = null; save(); renderPanel(); });
     qsa("[data-add]").forEach(btn => btn.onclick = () => { p.blocks.push({ id: uid(), type: btn.dataset.add }); save(); renderGrid(); });
   }
   /* ---------- Custom box dialog ---------- */
@@ -473,7 +533,8 @@
 
   const applyAccent = () => { const a = P().accent; a ? document.documentElement.style.setProperty("--accent", a) : document.documentElement.style.removeProperty("--accent"); };
   function renderAll() { applyAccent(); renderTabs(); renderLinks(); renderGrid(); renderPanel(); tick(); }
-  $("editBtn").onclick = () => { const on = document.body.classList.toggle("editing"); $("editBtn").textContent = on ? "Done" : "Edit"; $("editBtn").classList.toggle("on", on); };
+  $("editBtn").onclick = () => { const on = document.body.classList.toggle("editing"); $("editBtn").classList.toggle("on", on);
+    $("editBtn").title = on ? "Done editing" : "Edit settings"; $("editBtn").setAttribute("aria-label", on ? "Done editing" : "Edit settings"); };
 
   /* ---------- Clock ---------- */
   function tick() {
@@ -486,7 +547,19 @@
 
   /* ---------- Search ---------- */
   const ENGINES = { google: "https://www.google.com/search?q=", ddg: "https://duckduckgo.com/?q=", bing: "https://www.bing.com/search?q=", brave: "https://search.brave.com/search?q=" };
-  const SHORTCUTS = { yt: "https://www.youtube.com/results?search_query=", gh: "https://github.com/search?q=", w: "https://en.wikipedia.org/w/index.php?search=", g: ENGINES.google, d: ENGINES.ddg };
+  const BUILTIN_SHORTCUTS = [
+    { key: "yt", url: "https://www.youtube.com/results?search_query=%s" },
+    { key: "gh", url: "https://github.com/search?q=%s" },
+    { key: "w", url: "https://en.wikipedia.org/w/index.php?search=%s" },
+    { key: "g", url: ENGINES.google + "%s" },
+    { key: "d", url: ENGINES.ddg + "%s" }
+  ];
+  function ensureShortcuts() {
+    if (!Array.isArray(S.shortcuts) || !S.shortcuts.length) {
+      S.shortcuts = BUILTIN_SHORTCUTS.map(s => ({ key: s.key, url: s.url }));
+      save();
+    }
+  }
   const ENGINE_NAMES = { google: "Google", ddg: "DuckDuckGo", bing: "Bing", brave: "Brave" };
   const allEngines = () => { const o = { ...ENGINES }; (S.engines || []).forEach(en => o[en.id] = en.url); return o; };
   const buildURL = (id, q) => { const t = allEngines()[id] || ENGINES.google, e = encodeURIComponent(q); return t.includes("%s") ? t.replace("%s", e) : t + e; };
@@ -544,7 +617,11 @@
   $("search").addEventListener("submit", e => {
     e.preventDefault(); const raw = $("q").value.trim(); if (!raw) return;
     const [first, ...rest] = raw.split(/\s+/);
-    if (SHORTCUTS[first.toLowerCase()] && rest.length) { location.href = SHORTCUTS[first.toLowerCase()] + encodeURIComponent(rest.join(" ")); return; }
+    const sc = (S.shortcuts || []).find(s => s.key === first.toLowerCase());
+    if (sc && (!sc.url.includes("%s") || rest.length)) {
+      location.href = sc.url.includes("%s") ? sc.url.replace("%s", encodeURIComponent(rest.join(" "))) : sc.url;
+      return;
+    }
     if (isUrl(raw)) { location.href = /^https?:\/\//i.test(raw) ? raw : "https://" + raw; return; }
     location.href = buildURL($("engine").value, raw);
   });
@@ -620,30 +697,7 @@
     } else store.set("wxloc", JSON.stringify({ mode: "auto" }));
     $("wxDlg").close(); wxHTML = ""; paintWx(); loadWeather(); });
 
-  /* ---------- Animated background + FPS ---------- */
-  const cv = $("bg"), ctx = cv.getContext("2d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W, H, pts = [], mouse = { x: -999, y: -999 };
-  function resize() { const r = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0);
-    pts = Array.from({ length: Math.min(90, Math.floor(W * H / 16000)) }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3 })); }
-  addEventListener("resize", resize); addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; }); resize();
-  let frames = 0, last = performance.now();
-  function draw() {
-    ctx.clearRect(0, 0, W, H); const col = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
-    for (const p of pts) { if (!reduce) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
-      ctx.globalAlpha = .6; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, 6.283); ctx.fill(); }
-    ctx.strokeStyle = col; ctx.lineWidth = 1;
-    for (let i = 0; i < pts.length; i++) {
-      for (let j = i + 1; j < pts.length; j++) { const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-        if (d < 130) { ctx.globalAlpha = (1 - d / 130) * .22; ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke(); } }
-      const md = Math.hypot(pts[i].x - mouse.x, pts[i].y - mouse.y);
-      if (md < 170) { ctx.globalAlpha = (1 - md / 170) * .5; ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke(); }
-    }
-    frames++; const now = performance.now();
-    if (now - last >= 1000) { fps = Math.round(frames * 1000 / (now - last)); frames = 0; last = now; sysRows.FPS = fps; paintSys(); }
-    if (!reduce) requestAnimationFrame(draw);
-  }
-
-  renderAll(); loadWeather(); setInterval(loadWeather, 15 * 60000); draw();
+  ensureShortcuts(); applyTheme(); renderAll(); loadWeather(); setInterval(loadWeather, 15 * 60000);
 </script>
 
 <script>
