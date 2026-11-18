@@ -79,15 +79,14 @@
   .hero { text-align: center; margin-top: 4vh; }
   .date { color: var(--muted); font-size: 1.05rem; margin: 0 0 10px; }
   .clock { font-family: var(--mono); font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 400; letter-spacing: -.02em; margin: 0; line-height: 1.1; }
-  .greeting { color: var(--text); font-size: 1.5rem; font-weight: 500; margin: 12px 0 32px; }
-  #search { display: flex; align-items: center; gap: 10px; max-width: 640px; margin: 0 auto; padding: 6px 6px 6px 18px; transition: border-color .15s; }
+  #search { display: flex; align-items: center; gap: 10px; max-width: 640px; margin: 32px auto 0; padding: 6px 6px 6px 18px; transition: border-color .15s; }
   #search { position: relative; z-index: 50; }
   #search:focus-within { border-color: var(--accent); }
   #q { flex: 1; border: 0; outline: 0; font-size: 1.1rem; padding: 12px 0; }
   #search select { color: var(--muted); font-size: .85rem; }
-  .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 28px 0 32px; }
-  .links a { color: var(--text); text-decoration: none; padding: 8px 16px; border-radius: var(--radius); border: var(--bw) solid var(--border); background: var(--panel); font-size: .95rem; }
-  .links a:hover { border-color: var(--accent); color: var(--accent); }
+  .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; margin: 28px 0 32px; }
+  .links a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 2px 0; font-size: .95rem; }
+  .links a:hover { text-decoration-thickness: 2px; }
   .links .rm { margin-left: 8px; color: #f87171; cursor: pointer; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -180,7 +179,6 @@
   <section class="hero">
     <p class="date" id="date"></p>
     <h1 class="clock" id="clock">--:--</h1>
-    <p class="greeting" id="greeting">Hello</p>
     <form id="search" class="glass" autocomplete="off">
       <input type="text" id="q" placeholder="Search or type a URL" autofocus aria-label="Search">
       <select id="engine" aria-label="Search engine" hidden>
@@ -268,9 +266,9 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const uid = () => Math.random().toString(36).slice(2, 8);
 
-  /* ---------- State: profiles, each with its own greeting name, accent, links and blocks ---------- */
+  /* ---------- State: profiles, each with its own accent, links and blocks ---------- */
   const DEFAULT = () => ({ active: "main", profiles: [{
-    id: "main", name: CFG.profileName || "Home", greet: CFG.greet || "friend", accent: CFG.accent || "",
+    id: "main", name: CFG.profileName || "Home", accent: CFG.accent || "",
     links: (CFG.links || [{ name: "GitHub", url: "https://github.com" }, { name: "YouTube", url: "https://youtube.com" }]).map(l => ({ ...l })),
     blocks: [{ id: uid(), type: "system" }, { id: uid(), type: "weather" }, { id: uid(), type: "notes", text: store.get("notes") || "" }]
   }] });
@@ -435,14 +433,13 @@
   }
   $("tabs").addEventListener("click", e => {
     if (e.target.id === "addProfile") {
-      const p = { id: uid(), name: "New profile", greet: P().greet, accent: "", links: [], blocks: [{ id: uid(), type: "notes", text: "" }] };
+      const p = { id: uid(), name: "New profile", accent: "", links: [], blocks: [{ id: uid(), type: "notes", text: "" }] };
       S.profiles.push(p); S.active = p.id; save(); renderAll(); const n = $("pName"); n.focus(); n.select(); }
     else if (e.target.dataset.id) { S.active = e.target.dataset.id; save(); renderAll(); }
   });
   function renderPanel() {
     const p = P();
     $("panel").innerHTML = `<div class="row"><label>Profile name <input type="text" id="pName" value="${esc(p.name)}"></label>
-      <label>Greet me as <input type="text" id="pGreet" value="${esc(p.greet)}"></label>
       <label>Accent <input type="color" id="pAccent" value="${p.accent || "#8fb0ff"}"></label>
       ${S.profiles.length > 1 ? `<button class="ghost" id="pDel" style="margin-left:auto">Delete profile</button>` : ""}</div>
       <div class="row"><label>Theme <select id="themeSel">
@@ -464,7 +461,6 @@
         <input type="file" id="impFile" accept="application/json,.json" hidden>
         <span class="sub" id="bkMsg" style="margin:0"></span></div>`;
     $("pName").oninput = e => { p.name = e.target.value || "Profile"; save(); renderTabs(); };
-    $("pGreet").oninput = e => { p.greet = e.target.value; save(); tick(); };
     $("pAccent").oninput = e => { p.accent = e.target.value; save(); applyAccent(); };
     $("themeSel").value = store.get("theme") || "minimal";
     $("themeSel").onchange = e => { store.set("theme", e.target.value); applyTheme(); };
@@ -538,10 +534,9 @@
 
   /* ---------- Clock ---------- */
   function tick() {
-    const d = new Date(), h = d.getHours(), g = P().greet;
+    const d = new Date();
     $("clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     $("date").textContent = d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-    $("greeting").textContent = (h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (g ? ", " + g : "");
   }
   setInterval(tick, 10000);
 
