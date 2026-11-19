@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Home</title>
 <style>
-  /* ===== THEMES: fixed palettes and type systems, no blur or glow ===== */
-  :root, [data-theme="minimal"] {
-    --bg:#f4f2ed; --panel:#fbfaf7; --border:#d7d4cc; --text:#1a1a1a; --muted:#6b6a66;
-    --accent:#9a3b2e; --good:#3f6b4a;
-    --font:Arial, Helvetica, "Segoe UI", sans-serif;
-    --mono:"Courier New", Consolas, monospace;
-    --radius:2px; --bw:1px;
+  /* ===== THEMES: dark palettes only, no blur or glow ===== */
+  :root, [data-theme="monochrome"] {
+    color-scheme: dark;
+    --bg:#08090a; --panel:#111315; --border:#2a2e32; --text:#b9c0c7; --muted:#6d757d;
+    --accent:#7fd1c1; --good:#7fd1c1;
+    --font:Consolas, "Courier New", monospace; --mono:Consolas, monospace;
+    --radius:0; --bw:1px;
   }
   [data-theme="terminal"] {
     --bg:#0a0a06; --panel:#121206; --border:#5c4a1f; --text:#ffb000; --muted:#a87b1c;
@@ -19,17 +19,11 @@
     --font:"Courier New", Consolas, monospace; --mono:"Courier New", Consolas, monospace;
     --radius:0; --bw:1px;
   }
-  [data-theme="win95"] {
-    --bg:#c0c0c0; --panel:#c0c0c0; --border:#404040; --text:#000000; --muted:#4a4a4a;
-    --accent:#000080; --good:#006400;
-    --font:Tahoma, "MS Sans Serif", Arial, sans-serif; --mono:"Courier New", monospace;
-    --radius:0; --bw:2px;
-  }
-  [data-theme="analog"] {
-    --bg:#efe1c9; --panel:#f6ecd9; --border:#8a6b4a; --text:#3a2415; --muted:#7a6247;
-    --accent:#b4452a; --good:#5b6b3a;
-    --font:Georgia, "Times New Roman", serif; --mono:"Courier New", monospace;
-    --radius:2px; --bw:2px;
+  [data-theme="green"] {
+    --bg:#050a05; --panel:#0a120a; --border:#244a2a; --text:#5cff8f; --muted:#3a9e5c;
+    --accent:#8affb0; --good:#8affb0;
+    --font:"Courier New", Consolas, monospace; --mono:"Courier New", Consolas, monospace;
+    --radius:0; --bw:1px;
   }
   [data-theme="industrial"] {
     --bg:#101418; --panel:#151b20; --border:#2e3940; --text:#c9d3da; --muted:#7d8b95;
@@ -37,17 +31,35 @@
     --font:"Segoe UI", Arial, sans-serif; --mono:Consolas, "Courier New", monospace;
     --radius:2px; --bw:1px;
   }
-  [data-theme="swiss"] {
-    --bg:#fafafa; --panel:#ffffff; --border:#111111; --text:#111111; --muted:#555555;
-    --accent:#d6202b; --good:#167340;
-    --font:Arial, Helvetica, sans-serif; --mono:"Courier New", monospace;
-    --radius:0; --bw:2px;
+  [data-theme="slate"] {
+    --bg:#14181d; --panel:#1a2026; --border:#2c363f; --text:#ccd4dc; --muted:#8694a1;
+    --accent:#6f9ec9; --good:#7fa98a;
+    --font:"Segoe UI", Arial, sans-serif; --mono:Consolas, monospace;
+    --radius:2px; --bw:1px;
   }
-  [data-theme="monochrome"] {
-    --bg:#08090a; --panel:#111315; --border:#2a2e32; --text:#b9c0c7; --muted:#6d757d;
-    --accent:#7fd1c1; --good:#7fd1c1;
-    --font:Consolas, "Courier New", monospace; --mono:Consolas, monospace;
-    --radius:0; --bw:1px;
+  [data-theme="navy"] {
+    --bg:#0b1220; --panel:#111a2b; --border:#23324a; --text:#c8d6e8; --muted:#7f92ad;
+    --accent:#7aa7e0; --good:#79b49a;
+    --font:Arial, Helvetica, sans-serif; --mono:Consolas, monospace;
+    --radius:2px; --bw:1px;
+  }
+  [data-theme="ember"] {
+    --bg:#17120f; --panel:#1e1713; --border:#3a2a22; --text:#e3d6cb; --muted:#9c8272;
+    --accent:#d97b52; --good:#a3b487;
+    --font:Arial, Helvetica, sans-serif; --mono:"Courier New", monospace;
+    --radius:2px; --bw:1px;
+  }
+  [data-theme="forest"] {
+    --bg:#0d1511; --panel:#121c17; --border:#274035; --text:#d0ddd2; --muted:#81998a;
+    --accent:#8bb98d; --good:#8bb98d;
+    --font:Arial, Helvetica, sans-serif; --mono:Consolas, monospace;
+    --radius:2px; --bw:1px;
+  }
+  [data-theme="dusk"] {
+    --bg:#14101c; --panel:#1b1526; --border:#352a48; --text:#d9d0e3; --muted:#9486a8;
+    --accent:#ac8fc9; --good:#8bb9a5;
+    --font:Arial, Helvetica, sans-serif; --mono:Consolas, monospace;
+    --radius:2px; --bw:1px;
   }
   /* ====================================================== */
   * { box-sizing: border-box; }
@@ -55,19 +67,16 @@
   body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; justify-content: center; padding: 24px 20px 48px; }
   main { position: relative; z-index: 1; width: 100%; max-width: 920px; }
   .glass { background: var(--panel); border: var(--bw) solid var(--border); border-radius: var(--radius); }
-  [data-theme="terminal"] body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  [data-theme="terminal"] body::before, [data-theme="green"] body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,.28) 2px 4px); }
   [data-theme="industrial"] body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
     background-image: linear-gradient(rgba(201,211,218,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(201,211,218,.035) 1px, transparent 1px);
     background-size: 32px 32px; }
-  [data-theme="win95"] .glass { border-color:#ffffff #404040 #404040 #ffffff; box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080; }
-  [data-theme="win95"] .card h2 { display:block; background:#000080; color:#ffffff; padding:5px 8px; margin:-20px -20px 14px; }
-  [data-theme="analog"] .card h2, [data-theme="swiss"] .card h2 { border-bottom: var(--bw) solid var(--border); padding-bottom:8px; }
   button { background: var(--accent); color: var(--bg); border: 0; border-radius: 10px; font: inherit; font-weight: 600; padding: 9px 16px; cursor: pointer; }
   button.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); font-weight: 500; }
   button.ghost.on, button.ghost:hover { border-color: var(--accent); color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  input[type=text], input[type=number], select { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px; font: inherit; padding: 8px 10px; min-width: 0; }
+  input[type=text], input[type=number], select { background: transparent; color: var(--text); color-scheme: dark; border: 1px solid var(--border); border-radius: var(--radius); font: inherit; padding: 8px 10px; min-width: 0; }
   input::placeholder, textarea::placeholder { color: var(--muted); }
 
   .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -276,10 +285,10 @@
   if (!S || !S.profiles || !S.profiles.length) S = DEFAULT();
   const save = () => store.set("hp2", JSON.stringify(S));
   const P = () => S.profiles.find(p => p.id === S.active) || S.profiles[0];
-  const THEMES = ["minimal", "terminal", "win95", "analog", "industrial", "swiss", "monochrome"];
+  const THEMES = ["monochrome", "terminal", "green", "industrial", "slate", "navy", "ember", "forest", "dusk"];
   function applyTheme() {
-    const t = store.get("theme") || "minimal";
-    document.documentElement.dataset.theme = THEMES.includes(t) ? t : "minimal";
+    const t = store.get("theme") || "monochrome";
+    document.documentElement.dataset.theme = THEMES.includes(t) ? t : "monochrome";
   }
   let editingShortcut = null;
 
@@ -443,9 +452,9 @@
       <label>Accent <input type="color" id="pAccent" value="${p.accent || "#8fb0ff"}"></label>
       ${S.profiles.length > 1 ? `<button class="ghost" id="pDel" style="margin-left:auto">Delete profile</button>` : ""}</div>
       <div class="row"><label>Theme <select id="themeSel">
-        <option value="minimal">Minimal</option>
-        <optgroup label="Retro"><option value="terminal">Terminal / CRT</option><option value="win95">Windows 95</option><option value="analog">Analog paper</option></optgroup>
-        <optgroup label="Futuristic"><option value="industrial">Industrial</option><option value="swiss">Swiss</option><option value="monochrome">Monochrome</option></optgroup>
+        <optgroup label="Retro"><option value="terminal">Terminal / CRT (amber)</option><option value="green">Green screen</option></optgroup>
+        <optgroup label="Futuristic"><option value="industrial">Industrial</option><option value="monochrome">Monochrome</option></optgroup>
+        <optgroup label="Dark"><option value="slate">Slate</option><option value="navy">Navy</option><option value="ember">Ember</option><option value="forest">Forest</option><option value="dusk">Dusk</option></optgroup>
       </select></label></div>
       <div class="row"><span class="sub" style="margin:0">Add a block:</span>${Object.entries(TYPES).filter(([k]) => k !== "custom").map(([k, t]) => `<button class="ghost" data-add="${k}">+ ${t.label}</button>`).join("")}<button id="addCustom">+ Custom box</button></div>
       <div class="row"><span class="sub" style="margin:0">Search engines:</span>${(S.engines || []).map(en => `<span class="chip">${esc(en.name)} <b data-eng="${en.id}" title="Remove" style="cursor:pointer;color:#f87171">×</b></span>`).join("")}
@@ -462,7 +471,8 @@
         <span class="sub" id="bkMsg" style="margin:0"></span></div>`;
     $("pName").oninput = e => { p.name = e.target.value || "Profile"; save(); renderTabs(); };
     $("pAccent").oninput = e => { p.accent = e.target.value; save(); applyAccent(); };
-    $("themeSel").value = store.get("theme") || "minimal";
+    const savedTheme = store.get("theme") || "monochrome";
+    $("themeSel").value = THEMES.includes(savedTheme) ? savedTheme : "monochrome";
     $("themeSel").onchange = e => { store.set("theme", e.target.value); applyTheme(); };
     if ($("pDel")) $("pDel").onclick = () => {
       $("delMsg").textContent = `“${p.name}” and all of its links and boxes will be permanently removed. This can’t be undone.`;
